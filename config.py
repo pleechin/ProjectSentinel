@@ -1,6 +1,7 @@
 # ==========================================
 # Project Sentinel Configuration
 # ==========================================
+from watchlists.us_large_cap import WATCHLIST
 
 # Account
 ACCOUNT_SIZE_RM = 20000
@@ -24,20 +25,6 @@ EMA200 = 200
 MIN_VOLUME_RATIO = 1.20
 MIN_REWARD_RISK = 2.0
 MAX_ACCEPTABLE_STOP_PERCENT = 8.0
-
-# Scanner
-WATCHLIST = [
-    "AAPL",
-    "MSFT",
-    "NVDA",
-    "META",
-    "AMZN",
-    "GOOGL",
-    "AVGO",
-    "AMD",
-    "PLTR",
-    "TSLA",
-]
 
 MARKET_INDEX = [
     "SPY",
