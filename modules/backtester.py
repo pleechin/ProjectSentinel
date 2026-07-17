@@ -2,9 +2,13 @@ import pandas as pd
 import yfinance as yf
 
 from indicators.ema import add_ema
-from modules.performance import calculate_performance
+from modules.analytics import calculate_equity_analytics
 from modules.equity import build_equity_curve
+from modules.performance import calculate_performance
 from strategies import ema_crossover
+
+
+DEFAULT_STARTING_CAPITAL = 100000.0
 
 
 def download_history(
@@ -33,13 +37,30 @@ def download_history(
 def run_backtest(
     history: pd.DataFrame,
     strategy=ema_crossover,
+    starting_capital: float = DEFAULT_STARTING_CAPITAL,
 ) -> dict:
+    """
+    Run a completed-trade backtest and return:
+        summary
+        trades
+        equity_curve
+        analytics
+    """
+
+    if starting_capital <= 0:
+        raise ValueError("starting_capital must be greater than zero")
 
     if history.empty:
+        equity_curve = []
+
         return {
             "summary": calculate_performance([]),
             "trades": [],
-            "equity_curve": [],
+            "equity_curve": equity_curve,
+            "analytics": calculate_equity_analytics(
+                equity_curve,
+                starting_capital=starting_capital,
+            ),
         }
 
     if hasattr(strategy, "prepare"):
@@ -50,11 +71,9 @@ def run_backtest(
     in_position = False
     entry_price = 0.0
     entry_date = None
-
     trades = []
 
     for i in range(1, len(history)):
-
         previous_row = history.iloc[i - 1]
         current_row = history.iloc[i]
         current_date = history.index[i]
@@ -63,7 +82,6 @@ def run_backtest(
             not in_position
             and strategy.buy_signal(previous_row, current_row)
         ):
-
             in_position = True
             entry_price = float(current_row["Close"])
             entry_date = current_date
@@ -72,7 +90,6 @@ def run_backtest(
             in_position
             and strategy.sell_signal(previous_row, current_row)
         ):
-
             exit_price = float(current_row["Close"])
             exit_date = current_date
 
@@ -102,10 +119,19 @@ def run_backtest(
 
     summary = calculate_performance(trades)
 
-    equity_curve = build_equity_curve(trades)
+    equity_curve = build_equity_curve(
+        trades,
+        starting_capital=starting_capital,
+    )
+
+    analytics = calculate_equity_analytics(
+        equity_curve,
+        starting_capital=starting_capital,
+    )
 
     return {
         "summary": summary,
         "trades": trades,
         "equity_curve": equity_curve,
+        "analytics": analytics,
     }
