@@ -85,7 +85,7 @@ def analyse_stock_setup(
     ema200 = float(latest[f"EMA{EMA200}"])
 
     volume = float(latest["Volume"])
-    average_volume = float(latest["AverageVolume20"])
+    average_volume = float(latest["AvgVolume20"])
 
     distance_from_ema20 = (
         (close_price - ema20) / ema20
