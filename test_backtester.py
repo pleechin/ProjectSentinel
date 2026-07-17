@@ -2,10 +2,15 @@ from modules.backtester import (
     download_history,
     run_backtest,
 )
+from strategies import ema_crossover
+
 
 data = download_history("NVDA")
 
-result = run_backtest(data)
+result = run_backtest(
+    data,
+    strategy=ema_crossover,
+)
 
 print("=" * 60)
 print("BACKTEST SUMMARY")
@@ -21,9 +26,8 @@ print("=" * 60)
 for trade in result["trades"]:
     print(
         f"{trade['buy_date']} "
-        f"@ {trade['buy_price']:8.2f}"
-        f" -> "
-        f"{trade['sell_date']} "
+        f"@ {trade['buy_price']:8.2f} "
+        f"-> {trade['sell_date']} "
         f"@ {trade['sell_price']:8.2f} "
         f"| {trade['return_pct']:7.2f}% "
         f"| {trade['holding_days']:3} days"
