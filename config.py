@@ -2,6 +2,7 @@
 # Project Sentinel Configuration
 # ==========================================
 from watchlists.us_large_cap import WATCHLIST
+WATCHLIST_SYMBOLS = list(WATCHLIST.keys())
 
 # Account
 ACCOUNT_SIZE_RM = 20000

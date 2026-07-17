@@ -1,60 +1,50 @@
-WATCHLIST = [
+WATCHLIST = {
+    "AAPL": "Big Tech",
+    "MSFT": "Big Tech",
+    "NVDA": "AI",
+    "META": "Big Tech",
+    "AMZN": "Big Tech",
+    "GOOGL": "Big Tech",
+    "TSLA": "EV",
 
-    # ===== Big Tech =====
-    "AAPL",
-    "MSFT",
-    "NVDA",
-    "META",
-    "AMZN",
-    "GOOGL",
-    "TSLA",
+    "AMD": "AI",
+    "AVGO": "Semiconductor",
+    "PLTR": "AI",
+    "SMCI": "AI",
+    "ARM": "Semiconductor",
 
-    # ===== AI =====
-    "AMD",
-    "AVGO",
-    "PLTR",
-    "SMCI",
-    "ARM",
+    "QCOM": "Semiconductor",
+    "MU": "Semiconductor",
+    "TSM": "Semiconductor",
+    "AMAT": "Semiconductor",
+    "LRCX": "Semiconductor",
+    "KLAC": "Semiconductor",
+    "ASML": "Semiconductor",
 
-    # ===== Semiconductor =====
-    "QCOM",
-    "MU",
-    "TSM",
-    "AMAT",
-    "LRCX",
-    "KLAC",
-    "ASML",
+    "CRM": "Software",
+    "ADBE": "Software",
+    "ORCL": "Software",
+    "NOW": "Software",
+    "INTU": "Software",
+    "SNOW": "Software",
 
-    # ===== Software =====
-    "CRM",
-    "ADBE",
-    "ORCL",
-    "NOW",
-    "INTU",
-    "SNOW",
+    "CRWD": "Cybersecurity",
+    "PANW": "Cybersecurity",
+    "FTNT": "Cybersecurity",
+    "ZS": "Cybersecurity",
 
-    # ===== Cybersecurity =====
-    "CRWD",
-    "PANW",
-    "FTNT",
-    "ZS",
+    "MDB": "Cloud",
+    "DDOG": "Cloud",
+    "NET": "Cloud",
 
-    # ===== Cloud =====
-    "MDB",
-    "DDOG",
-    "NET",
+    "COST": "Consumer",
+    "NFLX": "Consumer",
+    "WMT": "Consumer",
 
-    # ===== Consumer =====
-    "COST",
-    "NFLX",
-    "WMT",
+    "JPM": "Finance",
+    "V": "Finance",
+    "MA": "Finance",
 
-    # ===== Finance =====
-    "JPM",
-    "V",
-    "MA",
-
-    # ===== Healthcare =====
-    "LLY",
-    "ABBV",
-]
+    "LLY": "Healthcare",
+    "ABBV": "Healthcare",
+}

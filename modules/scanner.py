@@ -1,6 +1,8 @@
 import pandas as pd
 import yfinance as yf
 
+from config import WATCHLIST_SYMBOLS
+
 from config import (
     ATR_PERIOD,
     EMA20,
@@ -183,7 +185,7 @@ def scan_watchlist(
 
     results = []
 
-    for symbol in WATCHLIST:
+    for symbol in WATCHLIST_SYMBOLS:
         print(f"Scanning {symbol}...")
 
         result = scan_stock(
