@@ -8,6 +8,6 @@ print("=" * 60)
 
 print(data.head())
 
-print()
-
-print(f"Rows downloaded : {len(data)}")
+print("\nRows downloaded :", len(data))
+print("Columns          :", list(data.columns))
+print("Index type       :", type(data.index).__name__)

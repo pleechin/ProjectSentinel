@@ -16,7 +16,8 @@ def download_history(symbol, period="5y"):
         progress=False,
     )
 
+    # Normalize MultiIndex columns if present
     if isinstance(data.columns, pd.MultiIndex):
-        data.columns = data.columns.get_level_values("Price")
+        data.columns = data.columns.droplevel(-1)
 
     return data
