@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 
 
@@ -5,11 +7,11 @@ def print_report(
     market: dict,
     results: pd.DataFrame,
 ) -> None:
-    """Print a clear trading-coach report."""
+    """Print the ranked Project Sentinel trading-coach report."""
 
     print()
     print("=" * 72)
-    print("PROJECT SENTINEL — TRADING COACH")
+    print("PROJECT SENTINEL — DECISION INTELLIGENCE")
     print("=" * 72)
     print(f"Market status : {market.get('Status', 'UNKNOWN')}")
     print(f"Market score  : {market.get('Score', 0):.0f}/100")
@@ -44,53 +46,62 @@ def print_report(
         print(f"#{position} — {row['Symbol']}")
         print("-" * 50)
 
-        print(f"Decision      : {row['Decision']}")
-        print(f"Rating        : {row['Rating']}")
-        print(f"Health        : {row['Health']}")
-        print(f"Overall score : {row['Total Score']}/100")
-        print(f"Trend         : {row['Trend']}")
-        print(f"Entry score   : {row['Entry Score']}/100")
+        print(f"Decision         : {row['Decision']}")
+        print(
+            f"Confidence       : "
+            f"{row['Confidence']} "
+            f"({int(row['Confidence Score'])}/100)"
+        )
+        print(f"Rating           : {row['Rating']}")
+        print(f"Health           : {row['Health']}")
+        print(f"Trend            : {row['Trend']}")
+        print(f"Entry score      : {row['Entry Score']}/100")
+
+        print()
+        print("SCORE BREAKDOWN")
+        print(
+            f"  Market : {int(row['Market Component'])}/20"
+        )
+        print(
+            f"  Trend  : {int(row['Trend Component'])}/30"
+        )
+        print(
+            f"  Entry  : {int(row['Entry Component'])}/30"
+        )
+        print(
+            f"  Risk   : {int(row['Risk Component'])}/20"
+        )
 
         print()
         print("TRADE PLAN")
         print(
-            f"Suggested entry : "
-            f"${row['Suggested Entry']:.2f}"
+            f"Suggested entry : ${row['Suggested Entry']:.2f}"
         )
         print(
-            f"Recommended stop: "
-            f"${row['Recommended Stop']:.2f}"
+            f"Recommended stop: ${row['Recommended Stop']:.2f}"
         )
         print(
-            f"Resistance      : "
-            f"${row['Resistance']:.2f}"
+            f"Resistance      : ${row['Resistance']:.2f}"
         )
         print(
-            f"Reward-to-risk  : "
-            f"{row['Reward Risk']:.2f}R"
+            f"Reward-to-risk  : {row['Reward Risk']:.2f}R"
         )
         print(
-            f"Position size   : "
-            f"{int(row['Position Size'])} shares"
+            f"Position size   : {int(row['Position Size'])} shares"
         )
         print(
-            f"Position value  : "
-            f"RM{row['Position Value RM']:,.2f}"
+            f"Position value  : RM{row['Position Value RM']:,.2f}"
         )
         print(
-            f"Estimated loss  : "
-            f"RM{row['Estimated Loss RM']:,.2f}"
+            f"Estimated loss  : RM{row['Estimated Loss RM']:,.2f}"
         )
         print(
-            f"Estimated profit: "
-            f"RM{row['Estimated Profit RM']:,.2f}"
+            f"Estimated profit: RM{row['Estimated Profit RM']:,.2f}"
         )
 
         print()
-        print("POSITIVE FACTORS")
-
+        print("WHY SENTINEL GAVE THIS SCORE")
         positive_factors = row["Positive Factors"]
-
         if positive_factors:
             for item in positive_factors:
                 print(f"  ✓ {item}")
@@ -98,10 +109,8 @@ def print_report(
             print("  None identified.")
 
         print()
-        print("WARNINGS")
-
+        print("WHAT NEEDS IMPROVEMENT")
         warnings = row["Warnings"]
-
         if warnings:
             for item in warnings:
                 print(f"  • {item}")
@@ -110,9 +119,7 @@ def print_report(
 
         print()
         print("NEXT ACTION")
-
         next_actions = row["Next Action"]
-
         if next_actions:
             for item in next_actions:
                 print(f"  → {item}")
