@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from modules.coach import build_coach_guidance
 from modules.score import calculate_score
 
 
@@ -8,12 +9,7 @@ def evaluate_trade(
     stock: dict,
     trade_plan: dict,
 ) -> dict:
-    """
-    Combine market, stock and risk information into one decision.
-
-    The confidence score is calculated by modules.score so the
-    weighting logic remains centralized and easy to test.
-    """
+    """Combine market, stock and risk information into one decision."""
 
     score_result = calculate_score(
         market=market,
@@ -21,32 +17,17 @@ def evaluate_trade(
         trade_plan=trade_plan,
     )
 
-    market_status = str(
-        market.get("Status", "UNKNOWN")
-    ).upper()
-    market_permission = bool(
-        market.get("Permission", False)
-    )
-    trend = str(
-        stock.get("Trend", "UNKNOWN")
-    ).upper()
-    entry_score = int(
-        stock.get("Entry Score", 0)
-    )
-    risk_passes = bool(
-        trade_plan.get("Risk Passes", False)
-    )
-    total_score = int(
-        score_result["Score"]
-    )
+    market_status = str(market.get("Status", "UNKNOWN")).upper()
+    market_permission = bool(market.get("Permission", False))
+    trend = str(stock.get("Trend", "UNKNOWN")).upper()
+    entry_score = int(stock.get("Entry Score", 0))
+    risk_passes = bool(trade_plan.get("Risk Passes", False))
+    total_score = int(score_result["Score"])
 
     candidate_passes = (
         market_permission
         and market_status == "HEALTHY"
-        and trend in {
-            "BULLISH",
-            "STRONG BULLISH",
-        }
+        and trend in {"BULLISH", "STRONG BULLISH"}
         and entry_score >= 80
         and risk_passes
         and total_score >= 75
@@ -54,17 +35,11 @@ def evaluate_trade(
 
     watch_passes = (
         market_permission
-        and trend in {
-            "BULLISH",
-            "STRONG BULLISH",
-            "MIXED",
-        }
+        and trend in {"BULLISH", "STRONG BULLISH", "MIXED"}
         and total_score >= 55
     )
 
-    next_actions = list(
-        score_result["Next Action"]
-    )
+    next_actions = list(score_result["Next Action"])
 
     if candidate_passes:
         decision = "CANDIDATE"
@@ -73,31 +48,38 @@ def evaluate_trade(
             "Review the chart and confirm the planned entry trigger",
         )
         advice = (
-            "This is one of today's stronger setups. "
-            "Review the chart carefully and wait for the planned "
-            "entry trigger before taking any position."
+            "This is one of today's stronger setups. Review the chart carefully "
+            "and wait for the planned entry trigger before taking any position."
         )
     elif watch_passes:
         decision = "WATCH"
         if not next_actions:
-            next_actions.append(
-                "Continue monitoring for stronger confirmation"
-            )
+            next_actions.append("Continue monitoring for stronger confirmation")
         advice = (
-            "Keep this stock on your watchlist. "
-            "The setup has positive qualities, but it still needs "
-            "better confirmation before entry."
+            "Keep this stock on your watchlist. The setup has positive qualities, "
+            "but it still needs better confirmation before entry."
         )
     else:
         decision = "WAIT"
         if not next_actions:
-            next_actions.append(
-                "Do not open a new long position"
-            )
+            next_actions.append("Do not open a new long position")
         advice = (
-            "Skip this stock today. Capital is better preserved "
-            "for a clearer and higher-quality opportunity."
+            "Skip this stock today. Capital is better preserved for a clearer "
+            "and higher-quality opportunity."
         )
+
+    next_actions = list(dict.fromkeys(next_actions))
+    score_result_for_coach = {
+        **score_result,
+        "Next Action": next_actions,
+    }
+    coach = build_coach_guidance(
+        market=market,
+        stock=stock,
+        trade_plan=trade_plan,
+        score_result=score_result_for_coach,
+        decision=decision,
+    )
 
     return {
         "Decision": decision,
@@ -113,7 +95,6 @@ def evaluate_trade(
         "Risk Component": score_result["Risk Component"],
         "Positive Factors": score_result["Positive Factors"],
         "Warnings": score_result["Warnings"],
-        "Next Action": list(
-            dict.fromkeys(next_actions)
-        ),
+        "Next Action": next_actions,
+        **coach,
     }
