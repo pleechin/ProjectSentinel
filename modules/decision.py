@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from modules.coach import build_coach_guidance
-from modules.explainability import build_explanation
+from modules.decision_card import build_decision_card
 from modules.score import calculate_score
 
 
@@ -24,7 +24,6 @@ def evaluate_trade(
     entry_score = int(stock.get("Entry Score", 0))
     risk_passes = bool(trade_plan.get("Risk Passes", False))
     total_score = int(score_result["Score"])
-    explanation = build_explanation(score_result, stock)
 
     candidate_passes = (
         market_permission
@@ -75,6 +74,14 @@ def evaluate_trade(
         **score_result,
         "Next Action": next_actions,
     }
+    decision_card = build_decision_card(
+        decision=decision,
+        score_result=score_result_for_coach,
+        stock=stock,
+        trade_plan=trade_plan,
+        market=market,
+    )
+
     coach = build_coach_guidance(
         market=market,
         stock=stock,
@@ -92,16 +99,16 @@ def evaluate_trade(
         "Advice": advice,
         "Total Score": total_score,
         "Market Component": score_result["Market Component"],
-        "Sector Component": score_result["Sector Component"],
-        "Industry Component": score_result["Industry Component"],
         "Trend Component": score_result["Trend Component"],
-        "Momentum Component": score_result["Momentum Component"],
-        "Volume Component": score_result["Volume Component"],
-        "Entry Component": score_result["Momentum Component"] + score_result["Volume Component"],
+        "Entry Component": score_result["Entry Component"],
         "Risk Component": score_result["Risk Component"],
+        "Sector Component": score_result.get("Sector Component", 0),
+        "Industry Component": score_result.get("Industry Component", 0),
+        "Momentum Component": score_result.get("Momentum Component", 0),
+        "Volume Component": score_result.get("Volume Component", 0),
         "Positive Factors": score_result["Positive Factors"],
         "Warnings": score_result["Warnings"],
         "Next Action": next_actions,
-        **explanation,
+        **decision_card,
         **coach,
     }

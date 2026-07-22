@@ -218,35 +218,72 @@ def _render_opportunities(results: pd.DataFrame) -> None:
     selected = filtered[filtered["Symbol"].astype(str) == symbol].iloc[0]
     st.markdown(f"### {_decision_icon(selected['Decision'])} {symbol} — {selected.get('Asset Type', 'ASSET')} — {selected['Decision']}")
     st.caption(str(selected.get("Category", "")))
+
     overview, plan, coach = st.columns(3)
     with overview:
-        st.write(f"**Score:** {int(selected['Total Score'])}/100")
+        st.metric("Confidence score", f"{int(selected.get('Confidence Score', selected['Total Score']))}/100")
         st.write(f"**Confidence:** {selected['Confidence']}")
         st.write(f"**Trend:** {selected['Trend']}")
-        st.write(f"**Sector:** {selected.get('Sector Name') or 'N/A'} ({int(selected.get('Sector Score', 50))}/100)")
-        st.write(f"**Industry:** {selected.get('Industry Name') or 'N/A'} ({int(selected.get('Industry Score', 50))}/100)")
+        st.write(f"**Entry score:** {int(selected['Entry Score'])}/100")
     with plan:
         st.write(f"**Entry:** ${float(selected['Suggested Entry']):.2f}")
         st.write(f"**Stop:** ${float(selected['Recommended Stop']):.2f}")
         st.write(f"**Resistance:** ${float(selected['Resistance']):.2f}")
         st.write(f"**Reward / risk:** {float(selected['Reward Risk']):.2f}R")
+        st.write(f"**Position size:** {int(selected.get('Position Size', 0))} shares")
     with coach:
+        st.write(f"**Setup:** {selected.get('Coach Setup Type', 'Sentinel setup')}")
         st.write(f"**Main blocker:** {selected['Coach Primary Blocker']}")
-        st.write(f"**Next action:** {selected['Coach Immediate Action']}")
         st.write(f"**Risk note:** {selected['Coach Risk Note']}")
-    st.success(str(selected["Coach Recommendation"]))
-    st.markdown("#### Why this decision")
-    for reason in selected.get("Why This Setup", []) or []:
-        st.write(f"✓ {reason}")
-    if selected.get("Why Not Higher"):
-        st.markdown("#### Why not a higher score")
-        for warning in selected.get("Why Not Higher", []) or []:
-            st.write(f"⚠ {warning}")
-    breakdown = pd.DataFrame(selected.get("Score Breakdown", []) or [])
-    if not breakdown.empty:
-        st.markdown("#### Transparent score breakdown")
-        st.dataframe(breakdown, use_container_width=True, hide_index=True)
 
+    st.markdown("#### Decision Intelligence")
+    confidence_col, risk_count_col = st.columns(2)
+    confidence_col.metric("Confidence", str(selected.get("Confidence Label", selected.get("Confidence", "UNKNOWN"))))
+    risk_count_col.metric("Risks found", int(selected.get("Risk Count", 0)))
+    st.caption(str(selected.get("Confidence Explanation", "")))
+
+    debate_left, debate_right = st.columns(2)
+    with debate_left:
+        st.markdown("##### 👍 Bull Case")
+        for reason in selected.get("Bull Case", selected.get("Why Buy", [])):
+            st.write(f"✓ {reason}")
+    with debate_right:
+        st.markdown("##### 👎 Bear Case / Devil's Advocate")
+        for reason in selected.get("Bear Case", selected.get("Why Not Buy", [])):
+            st.write(f"• {reason}")
+
+    st.info(f"**Sentinel verdict:** {selected.get('Devils Advocate Verdict', 'Review both sides before acting.')}" )
+    st.markdown(f"**Coach advice:** {selected.get('Coach Advice', selected.get('Coach Recommendation', 'Continue monitoring.'))}")
+
+    st.markdown("#### Decision Card")
+    positive_col, risk_col = st.columns(2)
+    with positive_col:
+        st.markdown("##### ✅ Why Buy / Why Consider")
+        for reason in selected.get("Why Buy", []):
+            st.write(f"✓ {reason}")
+    with risk_col:
+        st.markdown("##### ⚠️ Why Not Buy")
+        for reason in selected.get("Why Not Buy", []):
+            st.write(f"• {reason}")
+
+    watch_col, invalid_col = st.columns(2)
+    with watch_col:
+        st.markdown("##### 👀 What Must Improve or Be Watched")
+        for item in selected.get("What To Watch", []):
+            st.write(f"• {item}")
+    with invalid_col:
+        st.markdown("##### 🛑 If Sentinel Is Wrong")
+        for item in selected.get("Invalidation", []):
+            st.write(f"• {item}")
+
+    action = str(selected.get("Recommended Action", selected.get("Coach Immediate Action", "Continue monitoring.")))
+    if str(selected['Decision']).upper() == "CANDIDATE":
+        st.success(f"**Recommended action:** {action}")
+    elif str(selected['Decision']).upper() == "WATCH":
+        st.warning(f"**Recommended action:** {action}")
+    else:
+        st.info(f"**Recommended action:** {action}")
+    st.caption(str(selected["Coach Recommendation"]))
 
 
 def _render_learning(snapshot: dict, journal: pd.DataFrame) -> None:

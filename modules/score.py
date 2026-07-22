@@ -96,6 +96,7 @@ def calculate_score(market: dict, stock: dict, trade_plan: dict) -> dict:
         "Market Component": market_component, "Sector Component": sector_component,
         "Industry Component": industry_component, "Trend Component": trend_component,
         "Momentum Component": momentum_component, "Volume Component": volume_component,
+        "Entry Component": momentum_component + volume_component,
         "Risk Component": risk_component, "Positive Factors": positives,
         "Warnings": warnings, "Next Action": list(dict.fromkeys(actions)),
     }

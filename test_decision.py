@@ -38,19 +38,19 @@ print(f"Health            : {decision['Health']}")
 print(f"Total score       : {decision['Total Score']}/100")
 print(
     f"Market component  : "
-    f"{decision['Market Component']}/20"
+    f"{decision['Market Component']}/15"
 )
 print(
     f"Trend component   : "
-    f"{decision['Trend Component']}/30"
+    f"{decision['Trend Component']}/20"
 )
 print(
     f"Entry component   : "
-    f"{decision['Entry Component']}/30"
+    f"{decision['Entry Component']}/20"
 )
 print(
     f"Risk component    : "
-    f"{decision['Risk Component']}/20"
+    f"{decision['Risk Component']}/15"
 )
 
 print("\nPOSITIVE FACTORS")
