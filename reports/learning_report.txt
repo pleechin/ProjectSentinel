@@ -4,17 +4,17 @@ PROJECT SENTINEL — LEARNING ENGINE
 
 JOURNAL SUMMARY
 ------------------------------------------------------------------------
-Entries reviewed        : 48
-Unique symbols          : 32
+Entries reviewed        : 61
+Unique symbols          : 41
 Latest market-data date : 2026-07-21
-Average total score     : 71.4/100
-Average entry score     : 61.5/100
-Average reward-to-risk  : 0.41R
+Average total score     : 68.7/100
+Average entry score     : 54.4/100
+Average reward-to-risk  : 0.47R
 Risk-rule pass rate     : 0.0%
 
 DECISION BREAKDOWN
 ------------------------------------------------------------------------
-WATCH               : 48
+WATCH               : 61
 
 OBSERVED PATTERNS
 ------------------------------------------------------------------------

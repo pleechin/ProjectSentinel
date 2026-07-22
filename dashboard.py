@@ -22,7 +22,7 @@ def _run_scan() -> None:
         st.write("Ranking industry and thematic ETFs...")
         industries = get_industry_leadership()
         st.write("Scanning stocks and ETFs...")
-        results = scan_watchlist(market)
+        results = scan_watchlist(market, sectors=sectors, industries=industries)
         st.write("Updating planned-opportunity journal...")
         journal_result = save_planned_opportunities(results)
         st.write("Refreshing learning report...")
@@ -223,7 +223,8 @@ def _render_opportunities(results: pd.DataFrame) -> None:
         st.write(f"**Score:** {int(selected['Total Score'])}/100")
         st.write(f"**Confidence:** {selected['Confidence']}")
         st.write(f"**Trend:** {selected['Trend']}")
-        st.write(f"**Entry score:** {int(selected['Entry Score'])}/100")
+        st.write(f"**Sector:** {selected.get('Sector Name') or 'N/A'} ({int(selected.get('Sector Score', 50))}/100)")
+        st.write(f"**Industry:** {selected.get('Industry Name') or 'N/A'} ({int(selected.get('Industry Score', 50))}/100)")
     with plan:
         st.write(f"**Entry:** ${float(selected['Suggested Entry']):.2f}")
         st.write(f"**Stop:** ${float(selected['Recommended Stop']):.2f}")
@@ -234,6 +235,18 @@ def _render_opportunities(results: pd.DataFrame) -> None:
         st.write(f"**Next action:** {selected['Coach Immediate Action']}")
         st.write(f"**Risk note:** {selected['Coach Risk Note']}")
     st.success(str(selected["Coach Recommendation"]))
+    st.markdown("#### Why this decision")
+    for reason in selected.get("Why This Setup", []) or []:
+        st.write(f"✓ {reason}")
+    if selected.get("Why Not Higher"):
+        st.markdown("#### Why not a higher score")
+        for warning in selected.get("Why Not Higher", []) or []:
+            st.write(f"⚠ {warning}")
+    breakdown = pd.DataFrame(selected.get("Score Breakdown", []) or [])
+    if not breakdown.empty:
+        st.markdown("#### Transparent score breakdown")
+        st.dataframe(breakdown, use_container_width=True, hide_index=True)
+
 
 
 def _render_learning(snapshot: dict, journal: pd.DataFrame) -> None:

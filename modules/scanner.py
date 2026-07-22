@@ -13,6 +13,7 @@ from config import (
 from indicators.atr import add_atr
 from indicators.ema import add_ema
 from indicators.volume import add_average_volume
+from modules.context_mapping import lookup_context_score, resolve_asset_context
 from modules.decision import evaluate_trade
 from modules.ranking import rank_opportunities
 from modules.risk import calculate_trade_plan
@@ -104,26 +105,33 @@ def analyse_stock_setup(symbol: str, history: pd.DataFrame) -> dict:
     }
 
 
-def scan_stock(symbol: str, market: dict) -> dict | None:
+def scan_stock(symbol: str, market: dict, sectors: dict | None = None, industries: dict | None = None) -> dict | None:
     """Run the full Sentinel analysis for one tradable stock or ETF."""
     history = load_history(symbol)
     if history is None:
         return None
     history = calculate_indicators(history)
     asset = analyse_stock_setup(symbol=symbol, history=history)
+    sector_name, industry_name = resolve_asset_context(symbol, str(asset.get("Category", "")))
+    sector_score, sector_status = lookup_context_score(sectors, sector_name, "Sector", "Sector Score")
+    industry_score, industry_status = lookup_context_score(industries, industry_name, "Industry", "Industry Score")
+    asset.update({
+        "Sector Name": sector_name, "Sector Score": sector_score, "Sector Status": sector_status,
+        "Industry Name": industry_name, "Industry Score": industry_score, "Industry Status": industry_status,
+    })
     trade_plan = calculate_trade_plan(history)
     decision = evaluate_trade(market=market, stock=asset, trade_plan=trade_plan)
     return {**asset, **trade_plan, **decision}
 
 
-def scan_watchlist(market: dict) -> pd.DataFrame:
+def scan_watchlist(market: dict, sectors: dict | None = None, industries: dict | None = None) -> pd.DataFrame:
     """Scan stocks and ETFs and return one ranked opportunity table."""
     results = []
     for symbol in WATCHLIST_SYMBOLS:
         metadata = ASSET_UNIVERSE.get(symbol, {})
         asset_type = metadata.get("Asset Type", "ASSET")
         print(f"Scanning {symbol} ({asset_type})...")
-        result = scan_stock(symbol=symbol, market=market)
+        result = scan_stock(symbol=symbol, market=market, sectors=sectors, industries=industries)
         if result is not None:
             results.append(result)
     return rank_opportunities(results)

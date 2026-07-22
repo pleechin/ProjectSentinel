@@ -62,7 +62,7 @@ def build_dashboard_snapshot(
 
 def dashboard_table(results: pd.DataFrame) -> pd.DataFrame:
     columns = ["Rank", "Asset Type", "Symbol", "Category", "Decision", "Total Score", "Confidence",
-               "Trend", "Entry Score", "Volume Ratio", "Reward Risk", "Suggested Entry",
+               "Sector Name", "Sector Score", "Industry Name", "Industry Score", "Trend", "Entry Score", "Volume Ratio", "Reward Risk", "Suggested Entry",
                "Recommended Stop", "Resistance", "Coach Headline"]
     if results.empty:
         return pd.DataFrame(columns=columns)
