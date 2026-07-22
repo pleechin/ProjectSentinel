@@ -11,6 +11,7 @@ def build_dashboard_snapshot(
     results: pd.DataFrame,
     journal: pd.DataFrame,
     sectors: dict[str, Any] | None = None,
+    industries: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     portfolio = summarize_portfolio(results)
     journal_summary = summarize_journal(journal)
@@ -54,6 +55,7 @@ def build_dashboard_snapshot(
         },
         "portfolio": portfolio, "journal": journal_summary, "learning": learning,
         "sectors": sectors or {"status": "NO_DATA", "rankings": [], "leaders": [], "laggards": []},
+        "industries": industries or {"status": "NO_DATA", "rankings": [], "leaders": [], "laggards": []},
         "top_opportunity": top_any, "top_stock": top_for("STOCK"), "top_etf": top_for("ETF"),
     }
 

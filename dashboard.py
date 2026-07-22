@@ -4,6 +4,7 @@ import streamlit as st
 
 from modules.dashboard import build_dashboard_snapshot, dashboard_table, filter_dashboard_results
 from modules.journal import read_journal, save_planned_opportunities
+from modules.industry_analysis import get_industry_leadership
 from modules.learning import generate_learning_report
 from modules.market_context import get_market_context
 from modules.scanner import scan_watchlist
@@ -18,6 +19,8 @@ def _run_scan() -> None:
         market = get_market_context()
         st.write("Ranking US market sectors...")
         sectors = get_sector_rotation()
+        st.write("Ranking industry and thematic ETFs...")
+        industries = get_industry_leadership()
         st.write("Scanning stocks and ETFs...")
         results = scan_watchlist(market)
         st.write("Updating planned-opportunity journal...")
@@ -28,6 +31,7 @@ def _run_scan() -> None:
             "sentinel_market": market,
             "sentinel_results": results,
             "sentinel_sectors": sectors,
+            "sentinel_industries": industries,
             "sentinel_journal_result": journal_result,
             "sentinel_learning_result": learning_result,
             "sentinel_last_scan": datetime.now(),
@@ -102,6 +106,48 @@ def _render_sectors(snapshot: dict) -> None:
             hide_index=True,
             column_config={
                 "Sector Score": st.column_config.ProgressColumn(
+                    "Score", min_value=0, max_value=100, format="%d"
+                ),
+                "1M Return %": st.column_config.NumberColumn(format="%.2f%%"),
+                "3M Return %": st.column_config.NumberColumn(format="%.2f%%"),
+                "1M Relative %": st.column_config.NumberColumn(format="%.2f%%"),
+                "3M Relative %": st.column_config.NumberColumn(format="%.2f%%"),
+            },
+        )
+
+
+def _render_industries(snapshot: dict) -> None:
+    industries = snapshot.get("industries", {})
+    st.subheader("Industry Intelligence")
+    if industries.get("status") != "READY":
+        st.warning(industries.get("message", "Industry ranking is unavailable."))
+        return
+
+    leaders = industries.get("leaders", [])
+    if leaders:
+        columns = st.columns(min(3, len(leaders)))
+        for column, item in zip(columns, leaders):
+            with column:
+                st.metric(
+                    f"#{item['Rank']} {item['Industry']}",
+                    item["Symbol"],
+                    f"{item['Industry Score']}/100",
+                )
+                st.caption(item["Status"])
+
+    rankings = pd.DataFrame(industries.get("rankings", []))
+    if not rankings.empty:
+        display_columns = [
+            "Rank", "Industry", "Symbol", "Status", "Industry Score",
+            "1M Return %", "3M Return %", "1M Relative %",
+            "3M Relative %", "Reasons",
+        ]
+        st.dataframe(
+            rankings[[column for column in display_columns if column in rankings.columns]],
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Industry Score": st.column_config.ProgressColumn(
                     "Score", min_value=0, max_value=100, format="%d"
                 ),
                 "1M Return %": st.column_config.NumberColumn(format="%.2f%%"),
@@ -219,7 +265,7 @@ def _render_learning(snapshot: dict, journal: pd.DataFrame) -> None:
 
 def main() -> None:
     st.title("🛡️ Project Sentinel")
-    st.caption("US stocks + ETFs · Market context · Scanner · Coach · Journal · Learning")
+    st.caption("US stocks + ETFs · Market, sector and industry intelligence · Coach · Journal · Learning")
     with st.sidebar:
         st.header("Control Centre")
         if st.button("Run New Scan", type="primary", use_container_width=True):
@@ -243,7 +289,8 @@ def main() -> None:
     results = st.session_state["sentinel_results"]
     journal = read_journal()
     sectors = st.session_state.get("sentinel_sectors", {})
-    snapshot = build_dashboard_snapshot(market, results, journal, sectors)
+    industries = st.session_state.get("sentinel_industries", {})
+    snapshot = build_dashboard_snapshot(market, results, journal, sectors, industries)
     last_scan = st.session_state.get("sentinel_last_scan")
     if last_scan:
         st.caption(f"Last refreshed: {last_scan.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -254,6 +301,8 @@ def main() -> None:
         _render_market(snapshot)
         st.divider()
         _render_sectors(snapshot)
+        st.divider()
+        _render_industries(snapshot)
         st.divider()
         _render_leaders(snapshot)
     with opportunities_tab:
