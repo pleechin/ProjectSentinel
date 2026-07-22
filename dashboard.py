@@ -7,6 +7,7 @@ from modules.journal import read_journal, save_planned_opportunities
 from modules.learning import generate_learning_report
 from modules.market_context import get_market_context
 from modules.scanner import scan_watchlist
+from modules.sector_analysis import get_sector_rotation
 
 st.set_page_config(page_title="Project Sentinel", page_icon="🛡️", layout="wide")
 
@@ -15,6 +16,8 @@ def _run_scan() -> None:
     with st.status("Running Project Sentinel scan...", expanded=True) as status:
         st.write("Analysing broad-market trend and volatility...")
         market = get_market_context()
+        st.write("Ranking US market sectors...")
+        sectors = get_sector_rotation()
         st.write("Scanning stocks and ETFs...")
         results = scan_watchlist(market)
         st.write("Updating planned-opportunity journal...")
@@ -24,6 +27,7 @@ def _run_scan() -> None:
         st.session_state.update({
             "sentinel_market": market,
             "sentinel_results": results,
+            "sentinel_sectors": sectors,
             "sentinel_journal_result": journal_result,
             "sentinel_learning_result": learning_result,
             "sentinel_last_scan": datetime.now(),
@@ -63,6 +67,49 @@ def _render_market(snapshot: dict) -> None:
     if not indexes.empty:
         cols = [c for c in ["Symbol", "Close", "EMA20", "EMA50", "EMA200", "Score", "Reasons"] if c in indexes.columns]
         st.dataframe(indexes[cols], use_container_width=True, hide_index=True)
+
+
+
+def _render_sectors(snapshot: dict) -> None:
+    sectors = snapshot.get("sectors", {})
+    st.subheader("Sector Rotation")
+    if sectors.get("status") != "READY":
+        st.warning(sectors.get("message", "Sector ranking is unavailable."))
+        return
+
+    leaders = sectors.get("leaders", [])
+    if leaders:
+        columns = st.columns(min(3, len(leaders)))
+        for column, item in zip(columns, leaders):
+            with column:
+                st.metric(
+                    f"#{item['Rank']} {item['Sector']}",
+                    item["Symbol"],
+                    f"{item['Sector Score']}/100",
+                )
+                st.caption(item["Status"])
+
+    rankings = pd.DataFrame(sectors.get("rankings", []))
+    if not rankings.empty:
+        display_columns = [
+            "Rank", "Sector", "Symbol", "Status", "Sector Score",
+            "1M Return %", "3M Return %", "1M Relative %",
+            "3M Relative %", "Reasons",
+        ]
+        st.dataframe(
+            rankings[[column for column in display_columns if column in rankings.columns]],
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Sector Score": st.column_config.ProgressColumn(
+                    "Score", min_value=0, max_value=100, format="%d"
+                ),
+                "1M Return %": st.column_config.NumberColumn(format="%.2f%%"),
+                "3M Return %": st.column_config.NumberColumn(format="%.2f%%"),
+                "1M Relative %": st.column_config.NumberColumn(format="%.2f%%"),
+                "3M Relative %": st.column_config.NumberColumn(format="%.2f%%"),
+            },
+        )
 
 
 def _opportunity_card(title: str, item: dict | None) -> None:
@@ -195,7 +242,8 @@ def main() -> None:
     market = st.session_state["sentinel_market"]
     results = st.session_state["sentinel_results"]
     journal = read_journal()
-    snapshot = build_dashboard_snapshot(market, results, journal)
+    sectors = st.session_state.get("sentinel_sectors", {})
+    snapshot = build_dashboard_snapshot(market, results, journal, sectors)
     last_scan = st.session_state.get("sentinel_last_scan")
     if last_scan:
         st.caption(f"Last refreshed: {last_scan.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -204,6 +252,8 @@ def main() -> None:
     overview_tab, opportunities_tab, learning_tab = st.tabs(["Overview", "Stocks & ETFs", "Journal & Learning"])
     with overview_tab:
         _render_market(snapshot)
+        st.divider()
+        _render_sectors(snapshot)
         st.divider()
         _render_leaders(snapshot)
     with opportunities_tab:

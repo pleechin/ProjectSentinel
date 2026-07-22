@@ -6,7 +6,12 @@ from modules.learning import analyse_journal
 from modules.ranking import summarize_portfolio
 
 
-def build_dashboard_snapshot(market: dict[str, Any], results: pd.DataFrame, journal: pd.DataFrame) -> dict[str, Any]:
+def build_dashboard_snapshot(
+    market: dict[str, Any],
+    results: pd.DataFrame,
+    journal: pd.DataFrame,
+    sectors: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     portfolio = summarize_portfolio(results)
     journal_summary = summarize_journal(journal)
     learning = analyse_journal(journal)
@@ -48,6 +53,7 @@ def build_dashboard_snapshot(market: dict[str, Any], results: pd.DataFrame, jour
             "details": dict(market.get("details", {})),
         },
         "portfolio": portfolio, "journal": journal_summary, "learning": learning,
+        "sectors": sectors or {"status": "NO_DATA", "rankings": [], "leaders": [], "laggards": []},
         "top_opportunity": top_any, "top_stock": top_for("STOCK"), "top_etf": top_for("ETF"),
     }
 
