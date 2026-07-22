@@ -5,7 +5,7 @@ import streamlit as st
 from modules.dashboard import build_dashboard_snapshot, dashboard_table, filter_dashboard_results
 from modules.journal import read_journal, save_planned_opportunities
 from modules.learning import generate_learning_report
-from modules.market import analyse_market
+from modules.market_context import get_market_context
 from modules.scanner import scan_watchlist
 
 st.set_page_config(page_title="Project Sentinel", page_icon="🛡️", layout="wide")
@@ -13,8 +13,8 @@ st.set_page_config(page_title="Project Sentinel", page_icon="🛡️", layout="w
 
 def _run_scan() -> None:
     with st.status("Running Project Sentinel scan...", expanded=True) as status:
-        st.write("Analysing SPY and QQQ market health...")
-        market = analyse_market()
+        st.write("Analysing broad-market trend and volatility...")
+        market = get_market_context()
         st.write("Scanning stocks and ETFs...")
         results = scan_watchlist(market)
         st.write("Updating planned-opportunity journal...")
@@ -36,7 +36,7 @@ def _decision_icon(decision: str) -> str:
 
 
 def _market_icon(status: str) -> str:
-    return {"HEALTHY": "🟢", "CAUTION": "🟡", "UNHEALTHY": "🔴"}.get(str(status).upper(), "⚪")
+    return {"BULLISH": "🟢", "NEUTRAL": "🟡", "DEFENSIVE": "🔴", "HEALTHY": "🟢", "CAUTION": "🟡", "UNHEALTHY": "🔴"}.get(str(status).upper(), "⚪")
 
 
 def _render_overview(snapshot: dict) -> None:
@@ -54,7 +54,11 @@ def _render_market(snapshot: dict) -> None:
     market = snapshot["market"]
     st.subheader("Market Intelligence")
     permission = "New long setups permitted" if market["permission"] else "Preserve capital"
-    st.info(f"Market status: **{market['status']}** · Score: **{market['score']:.0f}/100** · {permission}")
+    confidence = market.get("confidence", "UNKNOWN")
+    st.info(
+        f"Market status: **{market['status']}** · Score: **{market['score']:.0f}/100** "
+        f"· Confidence: **{confidence}** · {permission}"
+    )
     indexes = pd.DataFrame(market["indexes"])
     if not indexes.empty:
         cols = [c for c in ["Symbol", "Close", "EMA20", "EMA50", "EMA200", "Score", "Reasons"] if c in indexes.columns]

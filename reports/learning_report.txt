@@ -4,33 +4,33 @@ PROJECT SENTINEL — LEARNING ENGINE
 
 JOURNAL SUMMARY
 ------------------------------------------------------------------------
-Entries reviewed        : 20
-Unique symbols          : 20
-Latest market-data date : 2026-07-20
-Average total score     : 66.2/100
-Average entry score     : 55.5/100
-Average reward-to-risk  : 0.30R
+Entries reviewed        : 48
+Unique symbols          : 32
+Latest market-data date : 2026-07-21
+Average total score     : 71.4/100
+Average entry score     : 61.5/100
+Average reward-to-risk  : 0.41R
 Risk-rule pass rate     : 0.0%
 
 DECISION BREAKDOWN
 ------------------------------------------------------------------------
-WATCH               : 20
+WATCH               : 48
 
 OBSERVED PATTERNS
 ------------------------------------------------------------------------
-Most frequent symbol    : JPM
-Highest average score  : JPM (73.0/100)
-Highest average R:R    : XLV (0.72R)
+Most frequent symbol    : XLF
+Highest average score  : DIA (82.0/100)
+Highest average R:R    : MU (1.47R)
 Most common trend       : STRONG BULLISH
 
 MOST FREQUENT SYMBOLS
 ------------------------------------------------------------------------
 Symbol       Entries     Avg Score     Avg R:R
-JPM                1          73.0       0.32R
-XLF                1          73.0       0.29R
-XLP                1          73.0       0.66R
-XLRE               1          73.0       0.23R
-XLV                1          73.0       0.72R
+XLF                2          77.5       0.30R
+XLV                2          77.5       0.82R
+CLOU               2          76.5       0.14R
+XLRE               2          75.5       0.29R
+HACK               2          74.5       0.64R
 
 LEARNING NOTES
 ------------------------------------------------------------------------

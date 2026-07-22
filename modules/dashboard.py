@@ -39,8 +39,14 @@ def build_dashboard_snapshot(market: dict[str, Any], results: pd.DataFrame, jour
     }
 
     return {
-        "market": {"status": str(market.get("Status", "UNKNOWN")), "score": float(market.get("Score", 0.0)),
-                   "permission": bool(market.get("Permission", False)), "indexes": list(market.get("Results", []))},
+        "market": {
+            "status": str(market.get("Status", market.get("market_status", "UNKNOWN"))),
+            "score": float(market.get("Score", market.get("market_score", 0.0))),
+            "confidence": str(market.get("Confidence", market.get("market_confidence", "UNKNOWN"))),
+            "permission": bool(market.get("Permission", False)),
+            "indexes": list(market.get("Results", market.get("drivers", []))),
+            "details": dict(market.get("details", {})),
+        },
         "portfolio": portfolio, "journal": journal_summary, "learning": learning,
         "top_opportunity": top_any, "top_stock": top_for("STOCK"), "top_etf": top_for("ETF"),
     }
